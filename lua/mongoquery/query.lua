@@ -26,18 +26,55 @@ function M.run_query(query_text)
   end
 
   -- Prepare query command - use single quotes to avoid escaping issues
-  local cliquery = string.format(
-    '%s %s %s --eval %s',
+  local cmd = {
     config.mongosh_command,
-    "'" .. connection .. "'",
+    connection,
     config.mongosh_options,
-    "'" .. query_text .. "'"
-  )
+    "--eval",
+    query_text,
+  }
 
-  -- Run query
-  local output = vim.fn.system(cliquery)
+  -- Run query with timeout
+  local timeout = config.query_timeout or 30000
+  local output = ""
+  local success = true
+
+  if vim.system then
+    -- Neovim >= 0.10
+    local result = vim.system(cmd, { text = true, timeout = timeout }):wait()
+    if result.code == 124 or result.signal == 15 then
+      -- Timeout or terminated
+      success = false
+      vim.notify("Query timeout (" .. (timeout / 1000) .. "s)", vim.log.levels.WARN, {
+        title = "MongoDB",
+      })
+      return
+    elseif result.code ~= 0 then
+      success = false
+      output = result.stderr or result.stdout or "Unknown error"
+    else
+      output = result.stdout or ""
+    end
+  else
+    -- Fallback for older Neovim versions
+    local cliquery = string.format(
+      '%s %s %s --eval %s',
+      config.mongosh_command,
+      "'" .. connection .. "'",
+      config.mongosh_options,
+      "'" .. query_text .. "'"
+    )
+    output = vim.fn.system(cliquery)
+  end
 
   vim.schedule(function()
+    if not success then
+      vim.notify("Query failed: " .. output, vim.log.levels.ERROR, {
+        title = "MongoDB",
+      })
+      return
+    end
+
     -- Strip ANSI color codes if present
     output = output:gsub("\27%[[0-9;]*[mK]", "")
 

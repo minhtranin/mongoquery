@@ -23,6 +23,9 @@ M.defaults = {
 
   mongosh_command = "mongosh",
   mongosh_options = "--quiet",
+
+  -- Query timeout in milliseconds (0 = no timeout)
+  query_timeout = 30000, -- 30 seconds
 }
 
 -- Current configuration (will be populated by setup)

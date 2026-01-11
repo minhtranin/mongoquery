@@ -8,13 +8,13 @@ A lightweight MongoDB query development tool for Neovim with support for multipl
 - 🔍 **Auto-detects** UI backend: fzf-lua, Telescope, mini.pick, or vim.ui.select
 - 🔌 Create, select, and delete MongoDB connections
 - 📁 Save and organize query files
-- ⚡ Fast query execution with minimal overhead
+- ⚡ Fast query execution with configurable timeout
 - ✂️ Visual mode support for running partial queries
 - 💾 Persistent connection state across sessions
 
 ## Requirements
 
-- Neovim >= 0.8.0
+- Neovim >= 0.8.0 (>= 0.10.0 recommended for query timeout support)
 - MongoDB Shell (`mongosh`) installed and in PATH
 - Optional (recommended): [fzf-lua](https://github.com/ibhagwan/fzf-lua), [Telescope](https://github.com/nvim-telescope/telescope.nvim), or [mini.pick](https://github.com/echasnovski/mini.pick)
 
@@ -62,6 +62,9 @@ Add this to your lazy.nvim configuration:
 
       -- Optional: Force specific picker
       -- picker = { type = "auto" }, -- "auto" | "fzf-lua" | "telescope" | "mini.pick" | "vim.ui.select"
+
+      -- Optional: Query timeout in milliseconds (default: 30000 = 30s, 0 = no timeout)
+      -- query_timeout = 60000, -- 60 seconds
     })
   end,
 }
@@ -130,6 +133,9 @@ require("mongoquery").setup({
   -- MongoDB shell configuration
   mongosh_command = "mongosh",
   mongosh_options = "--quiet",
+
+  -- Query timeout in milliseconds (0 = no timeout, default: 30000)
+  query_timeout = 30000, -- 30 seconds
 })
 ```
 
@@ -353,9 +359,19 @@ Install either fzf-lua or Telescope:
 - fzf-lua: https://github.com/ibhagwan/fzf-lua
 - Telescope: https://github.com/nvim-telescope/telescope.nvim
 
-### Query execution hangs
+### Query execution hangs or times out
 
-Check your connection string and ensure MongoDB server is accessible.
+The default timeout is 30 seconds. For long-running queries, increase the timeout:
+
+```lua
+require("mongoquery").setup({
+  query_timeout = 60000, -- 60 seconds
+  -- Or disable timeout completely:
+  -- query_timeout = 0,
+})
+```
+
+Also check your connection string and ensure MongoDB server is accessible.
 
 ### Results not showing
 
