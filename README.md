@@ -52,7 +52,17 @@ Add this to your lazy.nvim configuration:
     { "<leader>qc", "<cmd>MongoCreateQuery<cr>", desc = "MongoDB: Create query file" },
   },
   config = function()
-    require("mongoquery").setup()
+    require("mongoquery").setup({
+      -- Optional: Customize query directory (default: ~/.local/share/nvim/mongoquery/queries)
+      -- query_dir = "~/workspace/backup/query",
+      -- query_dir = "~/Documents/mongodb-queries",
+
+      -- Optional: Customize result file location (default: /tmp/mongoquery-result.js)
+      -- result_file = "/tmp/my-mongo-result.js",
+
+      -- Optional: Force specific picker
+      -- picker = { type = "auto" }, -- "auto" | "fzf-lua" | "telescope" | "mini.pick" | "vim.ui.select"
+    })
   end,
 }
 ```
@@ -94,11 +104,11 @@ require("mongoquery").setup({
   -- Path to connections JSON file
   connections_file = vim.fn.stdpath("config") .. "/mongo-connections.json",
 
-  -- Directory for query files
-  query_dir = "~/workspace/backup/query",
+  -- Directory for query files (default: ~/.local/share/nvim/mongoquery/queries)
+  query_dir = vim.fn.stdpath("data") .. "/mongoquery/queries",
 
-  -- Path to result output file
-  result_file = "~/workspace/backup/query/result.js",
+  -- Path to result output file (stored in /tmp for automatic cleanup)
+  result_file = "/tmp/mongoquery-result.js",
 
   -- Picker configuration
   picker = {
@@ -129,7 +139,7 @@ require("mongoquery").setup({
 require("mongoquery").setup({
   -- Use a custom query directory
   query_dir = "~/projects/mongodb-queries",
-  result_file = "~/projects/mongodb-queries/result.js",
+  result_file = "/tmp/my-mongo-result.js",
 
   -- Force use of Telescope
   picker = {
@@ -288,14 +298,16 @@ Typical startup overhead: **0ms** (when lazy loaded properly)
 
 ```
 ~/.config/nvim/
-└── mongo-connections.json         # Saved connections (version controlled)
+└── mongo-connections.json              # Saved connections (version controlled)
 
 ~/.local/share/nvim/
-└── mongoquery-state.json          # Last selected connection (per-machine)
+├── mongoquery-state.json               # Last selected connection (per-machine)
+└── mongoquery/
+    └── queries/
+        └── *.mongodb.js                # Your query files
 
-~/workspace/backup/query/          # Query directory (configurable)
-├── *.mongodb.js                   # Your query files
-└── result.js                      # Query results
+/tmp/
+└── mongoquery-result.js                # Query results (auto-cleaned on reboot)
 ```
 
 ### Connections File Format

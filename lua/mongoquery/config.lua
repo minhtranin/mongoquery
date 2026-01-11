@@ -3,8 +3,8 @@ local M = {}
 -- Default configuration
 M.defaults = {
   connections_file = vim.fn.stdpath("config") .. "/mongo-connections.json",
-  query_dir = vim.fn.expand("~/workspace/backup/query"),
-  result_file = vim.fn.expand("~/workspace/backup/query/result.js"),
+  query_dir = vim.fn.stdpath("data") .. "/mongoquery/queries",
+  result_file = "/tmp/mongoquery-result.js",
 
   picker = {
     type = "auto", -- "auto" | "fzf-lua" | "telescope" | "mini.pick" | "vim.ui.select"
