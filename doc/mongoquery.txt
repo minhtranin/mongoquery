@@ -1,0 +1,277 @@
+*mongoquery.txt*  MongoDB query development tool for Neovim
+
+==============================================================================
+CONTENTS                                                  *mongoquery-contents*
+
+    1. Introduction ............................ |mongoquery-introduction|
+    2. Requirements ............................ |mongoquery-requirements|
+    3. Installation ............................ |mongoquery-installation|
+    4. Configuration ........................... |mongoquery-configuration|
+    5. Commands ................................ |mongoquery-commands|
+    6. Functions ............................... |mongoquery-functions|
+    7. Usage ................................... |mongoquery-usage|
+    8. FAQ ..................................... |mongoquery-faq|
+    9. License ................................. |mongoquery-license|
+
+==============================================================================
+INTRODUCTION                                          *mongoquery-introduction*
+
+mongoquery.nvim is a MongoDB query development tool for Neovim that allows
+you to:
+
+- Execute MongoDB queries directly from buffers
+- Manage multiple MongoDB connections
+- Save and organize query files
+- Use your preferred fuzzy finder (fzf-lua, Telescope, or vim.ui.select)
+- Run queries asynchronously without blocking Neovim
+
+==============================================================================
+REQUIREMENTS                                          *mongoquery-requirements*
+
+- Neovim >= 0.8.0
+- MongoDB Shell (mongosh) installed and available in PATH
+- Optional: fzf-lua or Telescope for enhanced UI
+
+==============================================================================
+INSTALLATION                                          *mongoquery-installation*
+
+Using lazy.nvim: >
+    {
+      "yourusername/mongoquery.nvim",
+      dependencies = { "ibhagwan/fzf-lua" }, -- or telescope.nvim
+      cmd = {
+        "MongoSelectConnection",
+        "MongoCreateConnection",
+        "MongoRunQuery",
+        "MongoQueryList",
+        "MongoCreateQuery",
+      },
+      config = function()
+        require("mongoquery").setup()
+      end,
+    }
+<
+
+==============================================================================
+CONFIGURATION                                        *mongoquery-configuration*
+
+                                                          *mongoquery.setup()*
+setup({config})
+    Configure the plugin. If called without arguments, uses defaults.
+
+    Parameters: ~
+        {config} (table|nil) Configuration options
+
+    Default configuration: >
+        {
+          connections_file = vim.fn.stdpath("config")
+                           .. "/mongo-connections.json",
+          query_dir = "~/workspace/backup/query",
+          result_file = "~/workspace/backup/query/result.js",
+
+          picker = {
+            type = "auto",  -- "auto"|"fzf-lua"|"telescope"|"vim.ui.select"
+            opts = {},
+          },
+
+          keymaps = {
+            connection_select = "<leader>qa",
+            connection_create = "<leader>qn",
+            query_run_buffer = "<leader>qm",
+            query_run_selection = "<leader>qp",
+            query_list = "<leader>ql",
+            query_create = "<leader>qc",
+          },
+
+          mongosh_command = "mongosh",
+          mongosh_options = "--quiet",
+        }
+<
+
+    Configuration options: ~
+
+    connections_file        (string)
+        Path to JSON file storing saved connections.
+        Default: `stdpath("config")/mongo-connections.json`
+
+    query_dir               (string)
+        Directory where query files are stored.
+        Default: `~/workspace/backup/query`
+
+    result_file             (string)
+        Path where query results are written.
+        Default: `~/workspace/backup/query/result.js`
+
+    picker.type             (string)
+        UI picker to use: "auto", "fzf-lua", "telescope", "vim.ui.select"
+        Default: "auto"
+
+    picker.opts             (table)
+        Backend-specific options passed to the picker.
+        Default: {}
+
+    keymaps                 (table|false)
+        Key mappings for plugin functions. Set to false to disable.
+        Default: (see above)
+
+    mongosh_command         (string)
+        MongoDB shell command to use.
+        Default: "mongosh"
+
+    mongosh_options         (string)
+        Options passed to mongosh command.
+        Default: "--quiet"
+
+==============================================================================
+COMMANDS                                                  *mongoquery-commands*
+
+                                                      *:MongoSelectConnection*
+:MongoSelectConnection
+    Open picker to select a MongoDB connection from saved connections.
+
+                                                      *:MongoCreateConnection*
+:MongoCreateConnection
+    Create a new MongoDB connection. Prompts for connection name and URI.
+
+                                                             *:MongoRunQuery*
+:MongoRunQuery
+:[range]MongoRunQuery
+    Execute MongoDB query. Without range, executes entire buffer.
+    With range (visual mode), executes selected lines only.
+
+                                                           *:MongoQueryList*
+:MongoQueryList
+    Open picker to list and select from saved query files.
+
+                                                         *:MongoCreateQuery*
+:MongoCreateQuery
+    Create a new query file. Prompts for filename.
+
+==============================================================================
+FUNCTIONS                                                *mongoquery-functions*
+
+                                              *mongoquery.select_connection()*
+select_connection()
+    Programmatically open the connection picker.
+
+    Example: >
+        vim.keymap.set("n", "<leader>mc",
+          require("mongoquery").select_connection)
+<
+
+                                              *mongoquery.create_connection()*
+create_connection()
+    Programmatically create a new connection.
+
+                                                     *mongoquery.run_query()*
+run_query({use_selection})
+    Execute a MongoDB query.
+
+    Parameters: ~
+        {use_selection} (boolean) If true, uses visual selection.
+                                  If false, uses entire buffer.
+
+    Example: >
+        -- Run entire buffer
+        require("mongoquery").run_query(false)
+
+        -- Run visual selection
+        require("mongoquery").run_query(true)
+<
+
+                                                    *mongoquery.query_list()*
+query_list()
+    Programmatically open the query file picker.
+
+                                                   *mongoquery.create_query()*
+create_query()
+    Programmatically create a new query file.
+
+==============================================================================
+USAGE                                                        *mongoquery-usage*
+
+Basic workflow:
+
+1. Create a connection: >
+    :MongoCreateConnection
+<
+2. Select the connection: >
+    :MongoSelectConnection
+<
+3. Create a query file: >
+    :MongoCreateQuery
+<
+4. Write your MongoDB query in the buffer
+
+5. Execute the query: >
+    :MongoRunQuery
+<
+
+Visual mode workflow:
+
+1. Write multiple queries in a buffer
+2. Visually select the query you want to run
+3. Execute: >
+    :'<,'>MongoRunQuery
+<   Or use the keymap in visual mode
+
+Query examples: >
+    // Find documents
+    db.users.find({ age: { $gt: 25 } }).limit(10)
+
+    // Aggregate
+    db.orders.aggregate([
+      { $match: { status: "completed" } },
+      { $group: { _id: "$customer", total: { $sum: "$amount" } } }
+    ])
+
+    // List databases
+    db.adminCommand({ listDatabases: 1 })
+<
+
+==============================================================================
+FAQ                                                            *mongoquery-faq*
+
+Q: How do I change the picker UI?
+A: Configure it in setup(): >
+    require("mongoquery").setup({
+      picker = { type = "telescope" } -- or "fzf-lua"
+    })
+<
+
+Q: Where are my connections saved?
+A: By default in `~/.config/nvim/mongo-connections.json`
+   Configure with `connections_file` option.
+
+Q: Can I use custom keymaps?
+A: Yes, either modify the keymaps table or set it to false and define your
+   own: >
+    require("mongoquery").setup({ keymaps = false })
+    vim.keymap.set("n", "<leader>mq",
+      require("mongoquery").run_query)
+<
+
+Q: Query execution fails with "mongosh not found"
+A: Install MongoDB Shell from:
+   https://www.mongodb.com/docs/mongodb-shell/install/
+
+Q: How do I check if everything is working?
+A: Run the health check: >
+    :checkhealth mongoquery
+<
+
+Q: Can I organize queries in subdirectories?
+A: Yes, all `.mongodb.js` files in the query directory (including
+   subdirectories) will be found.
+
+Q: Single quotes in my queries cause errors
+A: The plugin automatically converts single quotes to double quotes for
+   JSON compatibility. This is normal behavior.
+
+==============================================================================
+LICENSE                                                    *mongoquery-license*
+
+MIT License
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
