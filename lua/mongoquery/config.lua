@@ -30,10 +30,16 @@ M.defaults = {
 
 -- Current configuration (will be populated by setup)
 M.options = {}
+M.user_config = {} -- Store user config for reload
 
 -- Setup function to merge user config with defaults
 function M.setup(user_config)
   user_config = user_config or {}
+
+  -- Store user config for reload
+  if not vim.tbl_isempty(user_config) then
+    M.user_config = user_config
+  end
 
   -- Deep merge defaults with user config
   M.options = vim.tbl_deep_extend("force", M.defaults, user_config)
