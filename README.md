@@ -26,7 +26,7 @@ Add this to your lazy.nvim configuration:
 
 ```lua
 {
-  "minhtranin/mongoquery.nvim",
+  "minhtranin/mongoquery",
   dependencies = {
     -- Optional: Choose your preferred picker (auto-detects if available)
     "ibhagwan/fzf-lua",
