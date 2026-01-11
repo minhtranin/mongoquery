@@ -45,8 +45,8 @@ function M.run_query(query_text)
     local file = io.open(config.result_file, "w")
     if file then
       file:write("// Connection: " .. connection_name .. "\n")
-      file:write("// " .. connection .. "\n")
-      file:write("// Result:\n\n")
+      file:write("// " .. connection .. "\n\n")
+      file:write("let result = ")
       file:write(output)
       file:close()
 
