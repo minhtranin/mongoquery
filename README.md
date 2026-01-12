@@ -1,6 +1,6 @@
 # mongoquery.nvim
 
-A lightweight MongoDB query development tool for Neovim with support for multiple fuzzy finder backends.
+A lightweight MongoDB query plugin development tool for Neovim with support for multiple fuzzy finder backends.
 
 # Demo
 
