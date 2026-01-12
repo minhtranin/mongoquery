@@ -2,6 +2,10 @@
 
 A lightweight MongoDB query development tool for Neovim with support for multiple fuzzy finder backends.
 
+# Demo
+
+[mongoquery.webm](https://github.com/user-attachments/assets/b43ed903-fff7-42dd-97c6-061fdf63acc7)
+
 ## Features
 
 - 🚀 Execute MongoDB queries directly from Neovim buffers
